@@ -51,26 +51,78 @@ if ( access_has_bug_level( config_get( 'show_monitor_list_threshold' ), $f_bug_i
 		if ( 0 == $num_users ) {
 			echo lang_get( 'no_users_monitoring_bug' );
 		} else {
-			$t_can_delete_others = access_has_bug_level( config_get( 'monitor_delete_others_bug_threshold' ), $f_bug_id ); 
+			$t_can_delete_others = access_has_bug_level( config_get( 'monitor_delete_others_bug_threshold' ), $f_bug_id );
 	 		for ( $i = 0; $i < $num_users; $i++ ) {
 				echo ($i > 0) ? ', ' : '';
 				echo print_user( $t_users[$i] );
 				if ( $t_can_delete_others ) {
-					echo ' [<a class="small" href="' . helper_mantis_url( 'bug_monitor_delete.php' ) . '?bug_id=' . $f_bug_id . '&user_id=' . $t_users[$i] . form_security_param( 'bug_monitor_delete' ) . '">' . lang_get( 'delete_link' ) . '</a>]';
+					echo ' [<a class="small" href="' . helper_mantis_url( 'bug_monitor_delete.php' )
+						. '?bug_id=' . $f_bug_id . '&user_id=' . $t_users[$i]
+						. form_security_param( 'bug_monitor_delete' ) . '">'
+						. lang_get( 'delete_link' ) . '</a>]';
 				}
 	 		}
  		}
 
 		if ( access_has_bug_level( config_get( 'monitor_add_others_bug_threshold' ), $f_bug_id ) ) {
-			echo '<br /><br />', lang_get( 'username' );
+
+			# Build list of users who can monitor the bug, excluding those already monitoring it
+			# @@@ Code is mostly based on print_user_option_list - maybe modify that slightly, to avoid code duplication
+			$t_users_can_monitor = project_get_all_user_rows( $g_project_override, config_get( 'monitor_bug_threshold' ) );
+
+			$t_display = array();
+			$t_sort = array();
+			$t_show_realname = ( ON == config_get( 'show_realname' ) );
+			$t_sort_by_last_name = ( ON == config_get( 'sort_by_last_name' ) );
+
+			foreach( $t_users_can_monitor as $key => $t_user ) {
+
+				# If user is already monitoring the issue, remove them from list
+				if( in_array( $t_user['id'], $t_users ) ) {
+					unset( $t_users_can_monitor[$key] );
+					continue;
+				}
+
+				$t_user_name = string_attribute( $t_user['username'] );
+				$t_sort_name = utf8_strtolower( $t_user_name );
+				if( $t_show_realname && ( $t_user['realname'] <> '' ) ) {
+					$t_user_name = string_attribute( $t_user['realname'] );
+					if( $t_sort_by_last_name ) {
+						$t_sort_name_bits = explode( ' ', utf8_strtolower( $t_user_name ), 2 );
+						$t_sort_name = ( isset( $t_sort_name_bits[1] ) ? $t_sort_name_bits[1] . ', ' : '' ) . $t_sort_name_bits[0];
+					} else {
+						$t_sort_name = utf8_strtolower( $t_user_name );
+					}
+				}
+				$t_display[] = $t_user_name;
+				$t_sort[] = $t_sort_name;
+			}
+
+			# Display form only if there are users who can monitor the bug
+			if( count( $t_users_can_monitor ) > 0 ) {
+				array_multisort( $t_sort, SORT_ASC, SORT_STRING, $t_users_can_monitor, $t_display );
+				echo '<br /><br />';
 ?>
-		<form method="get" action="bug_monitor_add.php">
-		<?php echo form_security_field( 'bug_monitor_add' ) ?>
-			<input type="hidden" name="bug_id" value="<?php echo (integer)$f_bug_id; ?>" />
-			<input type="text" name="username" />
-			<input type="submit" class="button" value="<?php echo lang_get( 'add_user_to_monitor' ) ?>" />
-		</form>
-		<?php } ?>
+				<form method="get" action="bug_monitor_add.php">
+				<?php echo form_security_field( 'bug_monitor_add' ) ?>
+					<input type="hidden" name="bug_id" value="<?php echo (integer)$f_bug_id; ?>" />
+					<select name="user_id">
+						<option value="0"></option>";
+<?php
+						# Build selection list with all users who can monitor this bug
+						foreach( $t_users_can_monitor as $key => $t_user ) {
+							echo '<option value="' . $t_user['id'] . '" ';
+							echo '>' . string_attribute( $t_display[$key] ) . '</option>';
+						}
+?>
+					</select>
+
+					<input type="submit" class="button" value="<?php echo lang_get( 'add_user_to_monitor' ) ?>" />
+				</form>
+<?php
+			}
+		}
+?>
 	</td>
 </tr>
 </table>

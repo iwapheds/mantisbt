@@ -34,20 +34,16 @@
 	$f_bug_id = gpc_get_int( 'bug_id' );
 	$t_bug = bug_get( $f_bug_id, true );
 	$f_username = gpc_get_string( 'username', '' );
+	$f_user_id = gpc_get_string( 'user_id', '' );
 
 	$t_logged_in_user_id = auth_get_current_user_id();
 
-	if ( is_blank( $f_username ) ) {
+	if ( is_blank( $f_user_id ) ) {
 		$t_user_id = $t_logged_in_user_id;
 	} else {
-		$t_user_id = user_get_id_by_name( $f_username );
-		if ( $t_user_id === false ) {
-			$t_user_id = user_get_id_by_realname( $f_username );
-
-			if ( $t_user_id === false ) {
-				error_parameters( $f_username );
-				trigger_error( ERROR_USER_BY_NAME_NOT_FOUND, E_USER_ERROR );
-			}
+		$t_user_id = $f_user_id;
+		if( 0 == $t_user_id ) {
+			trigger_error( ERROR_USER_BY_ID_NOT_FOUND, E_USER_ERROR );
 		}
 	}
 

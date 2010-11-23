@@ -1263,7 +1263,7 @@ $s_move_bug_button = 'Move';
 $s_attached_files = 'Attached Files';
 $s_publish = 'Publish';
 $s_cached = 'Cached';
-$s_add_user_to_monitor = 'Add';
+$s_add_user_to_monitor = 'Start Monitoring';
 
 # view_bug_inc.php
 

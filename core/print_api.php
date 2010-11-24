@@ -218,8 +218,9 @@ function print_captcha_input( $p_field_name ) {
 # This populates an option list with the appropriate users by access level
 #
 # @todo from print_reporter_option_list
-function print_user_option_list( $p_user_id, $p_project_id = null, $p_access = ANYBODY ) {
+function print_user_option_list( $p_user_id, $p_project_id = null, $p_access = ANYBODY, array $p_users_exclude = array() ) {
 	$t_current_user = auth_get_current_user_id();
+	$t_users = array();
 
 	if( null === $p_project_id ) {
 		$p_project_id = helper_get_current_project();
@@ -252,6 +253,13 @@ function print_user_option_list( $p_user_id, $p_project_id = null, $p_access = A
 	$t_show_realname = ( ON == config_get( 'show_realname' ) );
 	$t_sort_by_last_name = ( ON == config_get( 'sort_by_last_name' ) );
 	foreach( $t_users as $t_key => $t_user ) {
+
+		# Process exclusion list
+		if( in_array( $t_user['id'], $p_users_exclude ) ) {
+			unset( $t_users[$t_key] );
+			continue;
+		}
+
 		$t_user_name = string_attribute( $t_user['username'] );
 		$t_sort_name = utf8_strtolower( $t_user_name );
 		if( $t_show_realname && ( $t_user['realname'] <> '' ) ) {

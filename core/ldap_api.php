@@ -24,6 +24,137 @@
  */
 
 
+# ===================================
+# Caching
+# ===================================
+
+$g_cache_ldap = array();
+
+function ldap_cache_entry( $p_username ) {
+	global $g_cache_ldap;
+
+	if( isset( $g_cache_ldap[$p_username] ) ) {
+	    log_event( LOG_LDAP, "Retrieving '$p_username' from LDAP cache" );
+		return $g_cache_ldap[$p_username];
+	}
+
+	if ( ldap_simulation_is_enabled() ) {
+	    $t_user = ldap_simulation_get_user( $c_username );
+        if ( $t_user === null ) {
+		    log_event( LOG_LDAP, "simulation User '$p_username' not found" );
+		    return false;
+		}
+	} else {
+		$c_username = ldap_escape_string( $p_username );
+
+		$t_ldap_organization = config_get( 'ldap_organization' );
+		$t_ldap_root_dn      = config_get( 'ldap_root_dn' );
+		$t_ldap_uid_field    = config_get( 'ldap_uid_field', 'uid' );
+
+		$t_search_filter = "(&$t_ldap_organization($t_ldap_uid_field=$c_username))";
+		$t_search_attrs  = array(
+			$t_ldap_uid_field,
+			'dn',
+		);
+
+		# Bind
+		log_event( LOG_LDAP, "Binding to LDAP server" );
+		$t_ds = ldap_connect_bind();
+		if ( $t_ds === false ) {
+			log_event( LOG_LDAP, "ldap_connect_bind() returned false." );
+			return null;
+		}
+
+		# Search for the user id
+		log_event( LOG_LDAP, "Searching for $t_search_filter" );
+		$t_sr = ldap_search( $t_ds, $t_ldap_root_dn, $t_search_filter, $t_search_attrs );
+		if ( $t_sr === false ) {
+			ldap_unbind( $t_ds );
+			log_event( LOG_LDAP, "ldap_search() returned false." );
+			return null;
+		}
+
+		$t_info = ldap_get_entries( $t_ds, $t_sr );
+		if ( $t_info === false ) {
+			log_event( LOG_LDAP, "ldap_get_entries() returned false." );
+			return null;
+		}
+
+		if ( count( $t_info ) > 0 ) {
+			# Try to authenticate to each until we get a match
+			for ( $i = 0; $i < $t_info['count']; $i++ ) {
+				$t_dn = $t_info[$i]['dn'];
+                log_event( LOG_LDAP, "Checking {$t_info[$i]['dn']}" );
+
+				# Attempt to bind with the DN and password
+				if ( @ldap_bind( $t_ds, $t_dn, $p_password ) ) {
+					$t_authenticated = true;
+					break;
+				}
+			}
+		} else {
+		    log_event( LOG_LDAP, "No matching entries found" );
+		}
+		
+		log_event( LOG_LDAP, "Unbinding from LDAP server" );
+		ldap_free_result( $t_sr );
+		ldap_unbind( $t_ds );
+	}
+
+	# If user authenticated successfully then update the local DB with information
+	# from LDAP.  This will allow us to use the local data after login without
+	# having to go back to LDAP.  This will also allow fallback to DB if LDAP is down.
+	if ( $t_authenticated ) {
+		$t_user_id = user_get_id_by_name( $p_username );
+
+		if ( false !== $t_user_id ) {
+			user_set_field( $t_user_id, 'password', md5( $p_password ) );
+
+			if ( ON == config_get( 'use_ldap_realname' ) ) {
+				$t_realname = ldap_realname( $t_user_id );
+				user_set_field( $t_user_id, 'realname', $t_realname );
+			}
+
+			if ( ON == config_get( 'use_ldap_email' ) ) {
+				$t_email = ldap_email_from_username( $p_username );
+				user_set_field( $t_user_id, 'email', $t_email );
+			}
+		}
+        log_event( LOG_LDAP, "User '$p_username' authenticated" );
+	} else {
+        log_event( LOG_LDAP, "Authentication failed" );
+	}
+
+	return $t_authenticated;
+
+/*
+	$t_user_table = db_get_table( 'mantis_user_table' );
+
+	$query = "SELECT *
+				  FROM $t_user_table
+				  WHERE id=" . db_param();
+	$result = db_query_bound( $query, Array( $p_user_id ) );
+
+	if( 0 == db_num_rows( $result ) ) {
+		$g_cache_user[$p_user_id] = false;
+
+		if( $p_trigger_errors ) {
+			error_parameters( (integer)$p_user_id );
+			trigger_error( ERROR_USER_BY_ID_NOT_FOUND, ERROR );
+		}
+
+		return false;
+	}
+
+	$row = db_fetch_array( $result );
+
+	$g_cache_user[$p_user_id] = $row;
+
+	return $row;
+*/
+}
+
+
 /**
  * Logs the most recent LDAP error
  * @param resource $p_ds  LDAP resource identifier returned by ldap_connect
@@ -31,6 +162,7 @@
 function ldap_log_error( $p_ds ) {
 	log_event( LOG_LDAP, "ERROR #" . ldap_errno( $p_ds ) . ": " . ldap_error( $p_ds ) );
 }
+
 
 /**
  * Connect and bind to the LDAP directory

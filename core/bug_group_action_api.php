@@ -179,7 +179,7 @@ function bug_group_action_get_commands( $p_project_ids = null ) {
 		}
 
 		if( !isset( $t_commands['COPY'] ) &&
-			access_has_any_project( config_get( 'report_bug_threshold', null, null, $t_project_id ) ) ) {
+			access_can_report_bug() ) {
 			$t_commands['COPY'] = lang_get( 'actiongroup_menu_copy' );
 		}
 

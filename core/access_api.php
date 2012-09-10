@@ -366,7 +366,10 @@ function access_ensure_project_level( $p_access_level, $p_project_id = null, $p_
 }
 
 /**
- * Check whether the user has the specified access level for any project project
+ * Check whether the user has the specified access level for any project
+ * NOTE: This function can only check for a static access level, and as such
+ * does not yield correct results if checking for an access level defined by a
+ * config option which has been overridden at user- or project-level
  * @param int $p_access_level integer representing access level
  * @param int|null $p_user_id integer representing user id, defaults to null to use current user
  * @return bool whether user has access level specified
@@ -374,7 +377,6 @@ function access_ensure_project_level( $p_access_level, $p_project_id = null, $p_
  */
 function access_has_any_project( $p_access_level, $p_user_id = null ) {
 	# Short circuit the check in this case
-
 	if( NOBODY == $p_access_level ) {
 		return false;
 	}
@@ -391,6 +393,37 @@ function access_has_any_project( $p_access_level, $p_user_id = null ) {
 	}
 
 	return false;
+}
+
+/**
+ * Check whether the user has access to report issues in any project
+ * This was implemented to overcome the limitation of access_has_any_project()
+ * @param int|null $p_user_id defaults to null to use current user
+ * @return bool whether user has access level specified
+ * @access public
+ */
+function access_can_report_bug( $p_user_id = null ) {
+	# Cache the results for performance reasons
+	static $s_can_report_issues = null;
+
+	if( null === $s_can_report_issues ) {
+		$s_can_report_issues = false;
+
+		if( null === $p_user_id ) {
+			$p_user_id = auth_get_current_user_id();
+		}
+
+		$t_projects = project_get_all_rows();
+		foreach( $t_projects as $t_project ) {
+			$t_report_bug_threshold = config_get( 'report_bug_threshold', null, $p_user_id, $t_project['id'] );
+			if ( access_has_project_level( $t_report_bug_threshold, $t_project['id'] ) ) {
+				$s_can_report_issues = true;
+				return true;
+			}
+		}
+	}
+
+	return $s_can_report_issues;
 }
 
 /**

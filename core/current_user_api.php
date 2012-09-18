@@ -143,6 +143,24 @@ function current_user_get_all_accessible_subprojects( $p_project_id ) {
 }
 
 /**
+ * Return all projects in which user can report issues
+ * @return array list of projects
+ */
+function project_get_can_report( $p_user_id = null ) {
+	if( null === $p_user_id ) {
+		$p_user_id = auth_get_current_user_id();
+	}
+
+	$t_projects = project_get_all_rows();
+	foreach( $t_projects as $t_key => $t_project ) {
+		$t_report_bug_threshold = config_get( 'report_bug_threshold', null, $p_user_id, $t_project['id'] );
+		if ( !access_has_project_level( $t_report_bug_threshold, $t_project['id'] ) ) {
+			unset( $t_projects[$t_key] );
+		}
+	}
+}
+
+/**
  * Returns true if the currently logged in user is has a role of administrator
  * or higher, false otherwise
  *

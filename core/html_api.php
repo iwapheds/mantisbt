@@ -765,7 +765,9 @@ function print_menu() {
 		$t_menu_options[] = '<a href="' . helper_mantis_url( 'view_all_bug_page.php">' ) . lang_get( 'view_bugs_link' ) . '</a>';
 
 		# Report Bugs
-		if( access_can_report_bug() ) {
+		if( access_has_project_level( config_get( 'report_bug_threshold' ) )
+		 || $t_current_project == ALL_PROJECTS && access_can_report_bug()
+		) {
 			$t_menu_options[] = string_get_bug_report_link();
 		}
 

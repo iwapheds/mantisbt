@@ -209,8 +209,13 @@ function html_page_top1( $p_page_title = null ) {
 	}
 
 	# Advertise the availability of the browser search plug-ins.
-	echo "\t", '<link rel="search" type="application/opensearchdescription+xml" title="MantisBT: Text Search" href="' . string_sanitize_url( 'browser_search_plugin.php?type=text', true ) . '" />' . "\n";
-	echo "\t", '<link rel="search" type="application/opensearchdescription+xml" title="MantisBT: Issue Id" href="' . string_sanitize_url( 'browser_search_plugin.php?type=id', true ) . '" />' . "\n";
+	$t_search_title = config_get_global( 'search_title' );
+	echo "\t", '<link rel="search" type="application/opensearchdescription+xml" title="',
+		sprintf( lang_get( 'browser_search_text_shortname' ), $t_search_title ),
+		'" href="' . string_sanitize_url( 'browser_search_plugin.php?type=text', true) . '" />';
+	echo "\t", '<link rel="search" type="application/opensearchdescription+xml" title="',
+		sprintf( lang_get( 'browser_search_id_shortname' ), $t_search_title ),
+		'" href="' . string_sanitize_url( 'browser_search_plugin.php?type=id', true) . '" />';
 
 	html_head_javascript();
 }

@@ -802,6 +802,12 @@ $g_fallback_language = 'english';
 $g_window_title = 'MantisBT';
 
 /**
+ * browser search title
+ * @global string $g_search_title
+ */
+$g_search_title = 'MantisBT';
+
+/**
  * Check for admin directory, database upgrades, etc.
  * @global integer $g_admin_checks
  */

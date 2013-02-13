@@ -1566,6 +1566,12 @@ $s_month_october = 'October';
 $s_month_november = 'November';
 $s_month_december = 'December';
 
+# browser search plug-in
+$s_browser_search_id_shortname = '%1$s IssueId';
+$s_browser_search_id_description = '%1$s Issue Id';
+$s_browser_search_text_shortname = '%1$s Search';
+$s_browser_search_text_description = '%1$s Text Search';
+
 # Timeline Feature Strings
 $s_timeline_issue_created = '<span class="username">%1s</span> created issue <span class="issue_id">%2s</span>';
 $s_timeline_issue_note_created = '<span class="username">%1s</span> commented on issue <span class="issue_id">%2s</span>';

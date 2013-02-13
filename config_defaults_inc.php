@@ -808,10 +808,16 @@ $g_window_title = 'MantisBT';
 $g_admin_checks = ON;
 
 /**
- * Favicon image
+ * Favicon image (should be 16x16 size)
  * @global string $g_favicon_image
  */
 $g_favicon_image = 'images/favicon.ico';
+
+/**
+ * Favicon image MIME type (either image/x-icon or image/png)
+ * @global string $g_favicon_image_type
+ */
+$g_favicon_image_type = 'image/x-icon';
 
 /**
  * Logo

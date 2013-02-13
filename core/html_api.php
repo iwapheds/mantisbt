@@ -201,7 +201,11 @@ function html_page_top1( $p_page_title = null ) {
 
 	$t_favicon_image = config_get( 'favicon_image' );
 	if( !is_blank( $t_favicon_image ) ) {
-		echo "\t", '<link rel="shortcut icon" href="', helper_mantis_url( $t_favicon_image ), '" type="image/x-icon" />', "\n";
+		$t_favicon_image_type = config_get( 'favicon_image_type' );
+		echo "\t", '<link rel="shortcut icon" href="',
+			helper_mantis_url( $t_favicon_image ),
+			'" type="', $t_favicon_image_type,
+			'" />', "\n";
 	}
 
 	# Advertise the availability of the browser search plug-ins.

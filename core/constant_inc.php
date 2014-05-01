@@ -558,6 +558,11 @@ define( 'PHPMAILER_METHOD_MAIL', 0 );
 define( 'PHPMAILER_METHOD_SENDMAIL', 1 );
 define( 'PHPMAILER_METHOD_SMTP', 2 );
 
+# Email address validation types
+define( 'EMAIL_VALIDATE_PHP', 1 );
+define( 'EMAIL_VALIDATE_AUTO', 2 );
+define( 'EMAIL_VALIDATE_RFC5322', 3 );
+
 # Lengths - NOTE: these may represent hard-coded values in db schema and should not be changed.
 define( 'DB_FIELD_SIZE_USERNAME', 255 );
 define( 'DB_FIELD_SIZE_REALNAME', 255 );

@@ -110,17 +110,26 @@ function email_regex_simple() {
  * @return boolean
  */
 function email_is_valid( $p_email ) {
+	$t_validate_email = config_get( 'validate_email' );
+
 	# if we don't validate then just accept
-	if( OFF == config_get( 'validate_email' ) ||
+	if( OFF == $t_validate_email ||
 		ON == config_get( 'use_ldap_email' ) ||
 		( is_blank( $p_email ) && ON == config_get( 'allow_blank_email' ) )
 	) {
 		return true;
 	}
 
+	# E-mail validation method
+	switch( $t_validate_email ) {
+		case EMAIL_VALIDATE_PHP:     $t_method = 'php';   break;
+		case EMAIL_VALIDATE_RFC5322: $t_method = 'pcre8'; break;
+		default:                     $t_method = 'auto';  break;
+	}
+
 	# check email address is a valid format
 	$t_email = filter_var( $p_email, FILTER_SANITIZE_EMAIL );
-	if( PHPMailer::ValidateAddress( $t_email ) ) {
+	if( PHPMailer::ValidateAddress( $t_email, $t_method ) ) {
 		$t_domain = substr( $t_email, strpos( $t_email, '@' ) + 1 );
 
 		# see if we're limited to a set of known domains
@@ -149,7 +158,7 @@ function email_is_valid( $p_email ) {
 				}
 			}
 		} else {
-			# Email format was valid but did't check for valid mx records
+			# Email format was valid but didn't check for valid mx records
 			return true;
 		}
 	}

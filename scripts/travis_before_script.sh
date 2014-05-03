@@ -59,7 +59,7 @@ if [ $TRAVIS_PHP_VERSION = '5.3' ]; then
 	sudo apt-get install -qq apache2 libapache2-mod-php5 php5-mysql php5-pgsql
 
 	cat <<-EOF | sudo tee /etc/apache2/sites-available/default >/dev/null
-		<VirtualHost *:80>
+		<VirtualHost *:$PORT>
 		    DocumentRoot $PWD
 		    <Directory />
 		        Options FollowSymLinks
@@ -77,19 +77,21 @@ if [ $TRAVIS_PHP_VERSION = '5.3' ]; then
 	sudo service apache2 restart
 else
 set -vx
-echo "PATH=$PATH"
-which phpenv
-cat /home/travis/.phpenv/bin/phpenv
-echo "====="
-cat /home/travis/.phpenv/rbenv.d/exec/hhvm-switcher.bash
-echo "====="
+#~ echo "PATH=$PATH"
+#~ which phpenv
+#~ cat /home/travis/.phpenv/bin/phpenv
+#~ echo "====="
 	# use PHP's embedded server
 	# get path of PHP as the path is not in $PATH for sudo
 	myphp=$(which php)
-cat $myphp
-echo "====="
+#~ cat $myphp
+#~ echo "====="
+#~ FILE=/home/travis/.phpenv/rbenv.d/exec/hhvm-switcher.bash
+#~ #sed -i.bak -e '2i which phpenv' -e '2i echo "$PATH"' $FILE
+#~ cat $FILE
+#~ echo "====="
 	# sudo needed for port 80
-	sudo $myphp -S $HOSTNAME:$PORT &
+	$myphp -S $HOSTNAME:$PORT &
 fi
 
 # needed to allow web server to create config_inc.php

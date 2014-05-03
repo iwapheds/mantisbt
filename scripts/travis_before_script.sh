@@ -79,10 +79,14 @@ else
 set -vx
 echo "PATH=$PATH"
 which phpenv
+cat /home/travis/.phpenv/bin/phpenv
+echo "====="
 cat /home/travis/.phpenv/rbenv.d/exec/hhvm-switcher.bash
+echo "====="
 	# use PHP's embedded server
 	# get path of PHP as the path is not in $PATH for sudo
 	myphp=$(which php)
+file $myphp
 	# sudo needed for port 80
 	sudo $myphp -S $HOSTNAME:$PORT &
 fi

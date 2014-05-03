@@ -77,6 +77,7 @@ if [ $TRAVIS_PHP_VERSION = '5.3' ]; then
 	sudo service apache2 restart
 else
 set -vx
+echo "PATH=$PATH"
 	# use PHP's embedded server
 	# get path of PHP as the path is not in $PATH for sudo
 	myphp=$(which php)

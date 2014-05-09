@@ -325,8 +325,8 @@ function checktoken( $p_file, $p_base = false ) {
 					$t_expect_end_array = true;
 					break;
 				case T_CONSTANT_ENCAPSED_STRING:
-					if( $t_token[1][0] != '\'' ) {
-							print_error( 'Language strings should be single-quoted (line ' . $t_line . ')' );
+					if( $t_text[0] != '\'' ) {
+						print_error( 'Language strings should be single-quoted (line ' . $t_line . ')' );
 					}
 					if( $t_variable_array ) {
 						$t_current_var .= $t_text;
@@ -362,6 +362,26 @@ function checktoken( $p_file, $p_base = false ) {
 						$t_pass = false;
 						$t_fatal = true;
 					}
+
+					# HTML tags validation
+					if( preg_match('~</?[[:alpha:]][[:alnum:]]*>~iU', $text) ) {
+						$t_dom = new DOMDocument();
+						set_error_handler(
+							function ($p_type, $p_error, $p_file, $p_line, $p_context) {
+								throw new Exception( preg_replace( '/^DOM.*: (.*), line.*$/U', '\\1', $p_error ) );
+							},
+							E_WARNING
+						);
+						try {
+							$t_dom->loadHTML( $text, LIBXML_HTML_NOIMPLIED );
+						}
+						catch( Exception $e ) {
+							print_error( $e->getMessage() . " (line $line)", 'HTML ERROR' );
+							//var_dump($e);
+						}
+						restore_error_handler();
+					}
+
 					$t_current_var = null;
 					$t_need_end_variable = true;
 					break;

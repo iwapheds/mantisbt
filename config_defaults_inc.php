@@ -516,11 +516,12 @@ $g_email_receive_own = OFF;
  *
  * Determines if and how email addresses are validated. Possible values for
  * this config are:
- * - EMAIL_VALIDATE_PHP (default): validate using PHP's built-in method (see
+ * - EMAIL_VALIDATE_HTML5 (default): validate using the pattern given by the
+ *   HTML5 specification for 'email' type form input elements
+ *   {@link http://www.w3.org/TR/html5/forms.html#e-mail-state-%28type=email%29}
+ * - EMAIL_VALIDATE_PHP: validate using PHP's built-in method (see
  *   {@link http://php.net/filter_var} with FILTER_SANITIZE_EMAIL filter
  *   {@link http://php.net/filter.filters.validate}
- *   This should be used with internet-facing installations.
- *   Emails must have the form 'user@domain.tld'
  * - EMAIL_VALIDATE_RFC5322: validate using an RFC5322-compliant regex
  *   (see {@link http://squiloople.com/2009/12/20/email-address-validation/}.
  *   This is useful for intranet installations, when relying on addresses
@@ -531,6 +532,10 @@ $g_email_receive_own = OFF;
  *   generally the same as EMAIL_VALIDATE_RFC5322.
  * - OFF: disable email validation
  *
+ * With internet-facing installations, it is strongly advised to use either
+ * the default HTML5 (recommended) or PHP methods, which basically require that
+ * emails have the form 'user@domain.tld'.
+ *
  * NOTE: Regardless of how this option is set, validation is not performed
  * when using LDAP email (i.e. when $g_use_ldap_email = ON), as we assume that
  * it is handled by the directory.
@@ -538,7 +543,7 @@ $g_email_receive_own = OFF;
  *
  * @global integer $g_validate_email
  */
-$g_validate_email = EMAIL_VALIDATE_PHP;
+$g_validate_email = EMAIL_VALIDATE_HTML5;
 
 /**
  * set to OFF to disable email check

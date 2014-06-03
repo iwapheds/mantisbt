@@ -141,7 +141,14 @@
 				</para>
 				<itemizedlist>
 					<listitem><para>
-						<literal>EMAIL_VALIDATE_PHP</literal> (default):
+						<literal>EMAIL_VALIDATE_HTML5</literal> (default):
+						validate using the pattern given by the
+						<ulink url="http://www.w3.org/TR/html5/forms.html#e-mail-state-%28type=email%29">
+							HTML5 specification for <emphasis>email</emphasis>
+							type form input elements</ulink>.
+					</para></listitem>
+					<listitem><para>
+						<literal>EMAIL_VALIDATE_PHP</literal>:
 						validate using PHP's built-in method (see
 						<ulink url="http://php.net/filter_var">
 							filter_var() function</ulink> with

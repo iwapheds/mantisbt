@@ -116,6 +116,7 @@ html_page_top();
 
 <br />
 
+<div class="form-container">
 <form method="post" action="view_all_set.php">
 <?php # CSRF protection not required here - form does not result in modifications ?>
 <fieldset style="display: none">
@@ -125,7 +126,7 @@ html_page_top();
 	<input type="hidden" name="<?php echo FILTER_PROPERTY_SORT_FIELD_NAME; ?>" value="<?php echo $f_sort ?>" />
 	<input type="hidden" name="<?php echo FILTER_PROPERTY_SORT_DIRECTION; ?>" value="<?php echo $f_dir ?>" />
 </fieldset>
-<table class="width100" cellpadding="2px">
+<table>
 <?php
 #<SQLI> Excel & Print export
 #$f_bug_array stores the number of the selected rows
@@ -178,12 +179,13 @@ $t_icon_path = config_get( 'icon_path' );
 </table>
 
 </form>
+</div>
 
 <br />
-
+<div class="form-container">
 <form method="post" action="print_all_bug_page.php">
 <?php # CSRF protection not required here - form does not result in modifications ?>
-<table class="width100" cellspacing="1" cellpadding="2px">
+<table>
 <tr>
 	<td class="form-title" colspan="<?php echo $t_num_of_columns / 2 + $t_num_of_columns % 2; ?>">
 		<?php
@@ -248,6 +250,7 @@ $t_icon_path = config_get( 'icon_path' );
 	<input type="submit" class="button" value="<?php echo lang_get( 'hide_button' ) ?>" />
 </p>
 </form>
+</div>
 
 <?php
 html_page_bottom();

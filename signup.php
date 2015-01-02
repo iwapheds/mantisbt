@@ -37,9 +37,16 @@
 	$f_email = email_append_domain( trim( $f_email ) );
 	$f_captcha = utf8_strtolower( trim( $f_captcha ) );
 
+	# Retrieve captcha key now, as session might get cleared by logout
+	$t_form_key = session_get_int( CAPTCHA_KEY, null );
+
 	# force logout on the current user if already authenticated
 	if( auth_is_user_authenticated() ) {
 		auth_logout();
+		# Restart session and save captcha key again to ensure consistent
+		# behavior when the page is reloaded
+		session_init();
+		session_set( CAPTCHA_KEY, $t_form_key );
 	}
 
 	# Check to see if signup is allowed
@@ -50,8 +57,6 @@
 
 	if( ON == config_get( 'signup_use_captcha' ) && get_gd_version() > 0 	&&
 				helper_call_custom_function( 'auth_can_change_password', array() ) ) {
-		$t_form_key = session_get( CAPTCHA_KEY );
-
 		# captcha image requires GD library and related option to ON
 		$t_key = utf8_strtolower( utf8_substr( md5( config_get( 'password_confirm_hash_magic_string' ) . $t_form_key ), 1, 5) );
 
